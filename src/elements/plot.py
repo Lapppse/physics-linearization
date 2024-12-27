@@ -5,18 +5,18 @@ import streamlit as st
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error
 
-from utils import Functions
+from utils import Functions, get_sign
 from utils.enums import PlotType
 
 
 class Plot:
     def __init__(self, df: pd.DataFrame, plot_type: PlotType):
         self.plot_type = plot_type
-        self.df = df
-        self.df_drop = df.dropna()
+        self.df = df.dropna()
         self.update()
 
     def update(self):
+        self.df = self.df.dropna()
         self._update_fig()
         self._update_x()
         self._update_axes()
@@ -30,9 +30,7 @@ class Plot:
     def _update_fig(self):
         self.fig = go.Figure()
         self.fig.add_trace(
-            go.Scatter(
-                x=self.df_drop["x"], y=self.df_drop["y"], mode="markers", name="Points"
-            ),
+            go.Scatter(x=self.df["x"], y=self.df["y"], mode="markers", name="Points"),
         )
         self.fig.update_traces(marker=dict(size=10))
 
@@ -41,7 +39,7 @@ class Plot:
         match self.plot_type:
             case PlotType.LINEAR:
                 reg = LinearRegression()
-                reg.fit(self.df_drop.loc[:, ["x"]], self.df_drop.loc[:, ["y"]])
+                reg.fit(self.df.loc[:, ["x"]], self.df.loc[:, ["y"]])
                 self.slope, self.intercept = (reg.coef_[0][0], reg.intercept_[0])
 
                 self.x_min = (self.intercept * -1) / self.slope
@@ -50,14 +48,14 @@ class Plot:
                 )
             case PlotType.SEMILOG:
                 self.slope, self.intercept = np.polyfit(
-                    self.df_drop["x"], np.log(self.df_drop["y"]), 1
+                    self.df["x"], np.log(self.df["y"]), 1
                 )
                 self.x_min = 1
             case PlotType.LOG:
                 reg = LinearRegression()
                 reg.fit(
-                    np.log(self.df_drop.loc[:, ["x"]]),
-                    np.log(self.df_drop.loc[:, ["y"]]),
+                    np.log(self.df.loc[:, ["x"]]),
+                    np.log(self.df.loc[:, ["y"]]),
                 )
                 self.slope, self.intercept = (
                     reg.coef_[0][0],
@@ -124,11 +122,11 @@ class Plot:
         match self.plot_type:
             case PlotType.LINEAR:
                 st.markdown(
-                    f"Linear regression on transformed data: y = {round(self.slope, 10)}x + {round(self.intercept, 10)}"
+                    f"Linear regression on transformed data: y = {round(self.slope, 10)}x {get_sign(self.intercept)} {abs(round(self.intercept, 10))}"
                 )
             case PlotType.SEMILOG:
                 st.markdown(
-                    f"Exponential regression on transformed data: ln(y) = {self.slope:.10f}x + {self.intercept:.10f}"
+                    f"Exponential regression on transformed data: ln(y) = {self.slope:.10f}x {get_sign(self.intercept)} {round(self.intercept, 10)}"
                 )
             case PlotType.LOG:
                 st.markdown(
