@@ -17,5 +17,7 @@ with col1:
 
 with col2:
     plot = Plot(st.session_state.df, st.session_state.plot_type)
-    st.markdown(f"Correlation: {st.session_state.df['x'].corr(st.session_state.df['y']):.3f}")
+    st.markdown(
+        f"Correlation: {st.session_state.df['x'].corr(st.session_state.df['y']):.10f}"
+    )
     plot_selector = selects.PlotSelector()

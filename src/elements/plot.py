@@ -124,19 +124,19 @@ class Plot:
         match self.plot_type:
             case PlotType.LINEAR:
                 st.markdown(
-                    f"Linear regression on transformed data: y = {round(self.slope, 3)}x + {round(self.intercept, 3)}"
+                    f"Linear regression on transformed data: y = {round(self.slope, 10)}x + {round(self.intercept, 10)}"
                 )
             case PlotType.SEMILOG:
                 st.markdown(
-                    f"Exponential regression on transformed data: ln(y) = {self.slope:.3f}x + {self.intercept:.3f}"
+                    f"Exponential regression on transformed data: ln(y) = {self.slope:.10f}x + {self.intercept:.10f}"
                 )
             case PlotType.LOG:
                 st.markdown(
-                    f"Power regression on transformed data: y = {round(self.intercept, 3)} · x<sup>{round(self.slope, 3)}</sup>",
+                    f"Power regression on transformed data: y = {round(self.intercept, 10)} · x<sup>{round(self.slope, 10)}</sup>",
                     unsafe_allow_html=True,
                 )
                 st.markdown(
                     f"Mean squared error {
-                            round(mean_absolute_error(self.df["y"], Functions.power(self.df["x"], self.slope, self.intercept)), 3)
+                            round(mean_absolute_error(self.df["y"], Functions.power(self.df["x"], self.slope, self.intercept)), 10)
                             }"
                 )
